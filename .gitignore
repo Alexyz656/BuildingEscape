@@ -6,3 +6,4 @@
 BuildingEscape/Content/StarterContent/
 *.VC.db*
 *.VC.opendb
+*.ipch
