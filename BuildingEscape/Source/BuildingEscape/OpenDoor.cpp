@@ -12,8 +12,6 @@ UOpenDoor::UOpenDoor()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -22,18 +20,16 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 	Owner = GetOwner();	
-}
-
-void UOpenDoor::OpenDoor() {
-	Owner->SetActorRotation(FRotator(0.f, openAngle, 0.f));
-}
-
-void UOpenDoor::CloseDoor() {
-	Owner->SetActorRotation(FRotator(0.f, -90.f, 0.f));
+	if (!pressurePlate) {
+		UE_LOG(LogTemp, Error, TEXT("THIS DOESNT WORK"), );
+	}
 }
 
 float UOpenDoor::GetMassOnPlate()
 {
+	if (!pressurePlate) {
+		return 0.f;
+	}
 	TArray<AActor*> OverlappingActors;
 	pressurePlate->GetOverlappingActors(OUT OverlappingActors);
 	float mass = 0.f;
@@ -50,14 +46,11 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	UE_LOG(LogTemp, Error, TEXT("%f"), GetMassOnPlate());
-	if (pressurePlate && GetMassOnPlate() > TriggerMass) {
-		OpenDoor(); 
-		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
-	}
 
-	if (GetWorld()->GetTimeSeconds() - LastDoorOpenTime > doorCloseDelay) {
-		CloseDoor();
+	if (GetMassOnPlate() > TriggerMass) {
+		OnOpenRequest.Broadcast();
+	}else{
+		OnCloseRequest.Broadcast();
 	}
 }
 
